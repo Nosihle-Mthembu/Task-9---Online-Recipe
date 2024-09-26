@@ -1,9 +1,6 @@
-# React + Vite
+<img src="https://socialify.git.ci/Nosihle-Mthembu/Task-9---Online-Recipe/image?language=1&owner=1&name=1&stargazers=1&theme=Light" alt="Task-9---Online-Recipe" width="640" height="320" />
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-# Task-9---Online-Recipe
+<h1>Task-9---Online-Recipe</h1> 
+<p>Developing an online recipe application using React.js and a JSON Server that allows
+users to store, manage, and refer to their favorite recipes. It's exactly like a blog
+website, instead of articles you have recipes.</p>
