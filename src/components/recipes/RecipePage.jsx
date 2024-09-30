@@ -1,81 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const RecipesPage = () => {
-  const [recipes, setRecipes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+const RecipeCreate = () => {
+  const navigate = useNavigate();
+  const [recipe, setRecipe] = useState({ name: '', description: '', category: '', rating: 0 });
 
-  useEffect(() => {
-    fetchRecipes();
-  }, []);
-
-  const fetchRecipes = async () => {
-    try {
-      const response = await axios.get('http://localhost:3001/recipes', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setRecipes(response.data);
-      setLoading(false);
-    } catch (err) {
-      setError('Failed to fetch recipes');
-      setLoading(false);
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setRecipe({ ...recipe, [name]: value });
   };
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await fetch('http://localhost:8000/recipes', {
+      method: 'POST',
+      body: JSON.stringify(recipe),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    navigate('/');
   };
-
-  const filteredRecipes = recipes.filter(recipe =>
-    recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this recipe?')) {
-      try {
-        await axios.delete(`http://localhost:3001/recipes/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        setRecipes(recipes.filter(recipe => recipe.id !== id));
-      } catch (err) {
-        setError('Failed to delete recipe');
-      }
-    }
-  };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-5">Recipes</h2>
-      <input
-        type="text"
-        placeholder="Search recipes..."
-        value={searchTerm}
-        onChange={handleSearch}
-        className="w-full px-3 py-2 border rounded mb-5"
-      />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredRecipes.map(recipe => (
-          <div key={recipe.id} className="bg-white p-4 rounded shadow">
-            <img src={recipe.picture} alt={recipe.name} className="w-full h-48 object-cover mb-4 rounded" />
-            <h3 className="text-xl font-semibold mb-2">{recipe.name}</h3>
-            <p className="text-gray-600 mb-2">Category: {recipe.category}</p>
-            <p className="text-gray-600 mb-2">Prep time: {recipe.prepTime}</p>
-            <p className="text-gray-600 mb-4">Cook time: {recipe.cookTime}</p>
-            <div className="flex justify-between">
-              <Link to={`/edit-recipe/${recipe.id}`} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Edit</Link>
-              <button onClick={() => handleDelete(recipe.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <h2>Create Recipe</h2>
+      <label>
+        Name:
+        <input type="text" name="name" value={recipe.name} onChange={handleChange} required />
+      </label>
+      <label>
+        Description:
+        <textarea name="description" value={recipe.description} onChange={handleChange} required />
+      </label>
+      <label>
+        Category:
+        <input type="text" name="category" value={recipe.category} onChange={handleChange} required />
+      </label>
+      <label>
+        Rating:
+        <input type="number" name="rating" min="1" max="5" value={recipe.rating} onChange={handleChange} />
+      </label>
+      <button type="submit">Add Recipe</button>
+    </form>
   );
 };
 
-export default RecipesPage;
+export default RecipeCreate;

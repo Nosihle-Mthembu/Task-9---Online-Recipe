@@ -1,61 +1,58 @@
-// const createRecipe = async (newRecipe) => {
-//     const response = await fetch('http://localhost:8000/recipes', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(newRecipe),
-//     });
-    
-//     const data = await response.json();
-//     return data;
-//   };
+import jsonServer from 'json-server';
+import jwt from 'jsonwebtoken';
 
-  
-//   const fetchRecipes = async () => {
-//     const response = await fetch('http://localhost:8000/recipes');
-//     const data = await response.json();
-//     return data;
-//   };
-
-  
-//   const updateRecipe = async (id, updatedRecipe) => {
-//     const response = await fetch(`http://localhost:8000/recipes/${id}`, {
-//       method: 'PUT',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(updatedRecipe),
-//     });
-    
-//     const data = await response.json();
-//     return data;
-//   };
-
-  
-//   const deleteRecipe = async (id) => {
-//     await fetch(`http://localhost:8000/recipes/${id}`, {
-//       method: 'DELETE',
-//     });
-//   };
-  
-
-// server.js
-
-// import jsonServer from 'json-server';
-import auth from 'json-server-auth';
-import { join } from 'path';
-import cors from 'cors';
-
-const jsonServer = require('json-server');
 const server = jsonServer.create();
-const router = jsonServer.router(join(process.cwd(), 'db.json'));
+const router = jsonServer.router('db.json');
 const middlewares = jsonServer.defaults();
+const SECRET_KEY = 'your_secret_key';
+const expiresIn = '1h';
 
-server.use(cors());
-server.db = router.db;
-server.use(middlewares);
+// Create a token from a payload
+function createToken(payload) {
+  return jwt.sign(payload, SECRET_KEY, { expiresIn });
+}
+
+// Verify the token
+function verifyToken(token) {
+  return jwt.verify(token, SECRET_KEY, (err, decode) => decode !== undefined ? decode : err);
+}
+
+// Middleware for checking authentication
 server.use(jsonServer.bodyParser);
-server.use(auth);
-server.use(router);
+server.use(middlewares);
 
-server.listen(8000, () => {
-  console.log('JSON Server is running on port 8000');
+server.post('/register', (req, res) => {
+  const { email, password } = req.body;
+  const token = createToken({ email });
+  res.status(200).json({ token });
 });
 
+server.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const user = router.db.get('users').find({ email }).value();
+  if (user && user.password === password) {
+    const token = createToken({ email });
+    res.status(200).json({ token });
+  } else {
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
+});
+
+server.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
+    const token = req.headers.authorization.split(' ')[1];
+    try {
+      verifyToken(token);
+      next();
+    } catch (err) {
+      res.status(401).json({ message: 'Unauthorized' });
+    }
+  } else {
+    next();
+  }
+});
+
+server.use(router);
+server.listen(8000, () => {
+  console.log('JSON Server is running');
+});
