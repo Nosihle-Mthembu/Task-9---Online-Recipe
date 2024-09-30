@@ -14,6 +14,7 @@ const AddRecipePage = () => {
     servings: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,13 +23,28 @@ const AddRecipePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
       await axios.post('http://localhost:3001/recipes', recipe, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
+      // Reset form after submission
+      setRecipe({
+        name: '',
+        picture: '',
+        ingredients: '',
+        instructions: '',
+        category: '',
+        prepTime: '',
+        cookTime: '',
+        servings: ''
+      });
       navigate('/');
     } catch (err) {
-      setError('Failed to add recipe');
+      setError(err.response?.data?.message || 'Failed to add recipe');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -140,8 +156,12 @@ const AddRecipePage = () => {
             required
           />
         </div>
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
-          Add Recipe
+        <button 
+          type="submit" 
+          className={`w-full py-2 rounded ${loading ? 'bg-gray-500' : 'bg-green-600 hover:bg-green-700 text-white'}`} 
+          disabled={loading}
+        >
+          {loading ? 'Adding...' : 'Add Recipe'}
         </button>
       </form>
     </div>

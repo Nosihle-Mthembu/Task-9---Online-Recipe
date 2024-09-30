@@ -12,8 +12,11 @@
   "dependencies": {
     "@tailwindcss/forms": "^0.5.9",
     "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
     "json-server": "^1.0.0-beta.3",
     "json-server-auth": "^2.1.0",
+    "node": "^22.9.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "require": "^0.4.4",

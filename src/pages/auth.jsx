@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('http://localhost:3001/register', userData);
+      const response = await axios.post('http://localhost:8000/register', userData);
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       setIsAuthenticated(true);

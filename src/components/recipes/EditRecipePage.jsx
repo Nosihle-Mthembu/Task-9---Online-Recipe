@@ -41,15 +41,19 @@ const EditRecipePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Clear previous errors
     try {
       await axios.put(`http://localhost:3001/recipes/${id}`, recipe, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
+      alert('Recipe updated successfully!'); // Success message
       navigate('/');
     } catch (err) {
-      setError('Failed to update recipe');
+      console.error('Error updating recipe:', err);
+      setError('Failed to update recipe. Please try again.'); // User-friendly error
     }
   };
+  
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

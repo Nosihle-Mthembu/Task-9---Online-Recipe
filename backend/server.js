@@ -38,17 +38,20 @@
 
 // server.js
 
-import jsonServer from 'json-server';
+// import jsonServer from 'json-server';
 import auth from 'json-server-auth';
 import { join } from 'path';
+import cors from 'cors';
 
+const jsonServer = require('json-server');
 const server = jsonServer.create();
 const router = jsonServer.router(join(process.cwd(), 'db.json'));
 const middlewares = jsonServer.defaults();
 
-// Bind the auth middleware to the json server
+server.use(cors());
 server.db = router.db;
 server.use(middlewares);
+server.use(jsonServer.bodyParser);
 server.use(auth);
 server.use(router);
 
